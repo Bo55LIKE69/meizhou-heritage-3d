@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>梅州市非物质文化遗产 · 三维地形</title>
+<link rel="stylesheet" href="cesium/Widgets/widgets.css" />
+<style>
+  :root{
+    --bg:#0a0e14; --panel:rgba(16,22,32,.92); --line:rgba(255,255,255,.10);
+    --txt:#e6edf3; --dim:#8b98a9; --acc:#4ea3ff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
+    font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;overflow:hidden}
+  #cesiumContainer{position:absolute;inset:0}
+  .cesium-widget-credits,.cesium-viewer-bottom,.cesium-credit-textContainer,
+  .cesium-credit-logoContainer,.cesium-credit-lightbox,.cesium-credit-expand-link{
+    display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+
+  #panel{position:absolute;left:14px;top:14px;width:268px;max-height:calc(100% - 28px);
+    overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 14px 16px;backdrop-filter:blur(8px);z-index:10;font-size:12.5px}
+  #panel h1{margin:0 0 2px;font-size:15px;letter-spacing:.5px}
+  #panel .sub{color:var(--dim);font-size:11px;margin-bottom:12px;line-height:1.5}
+  .grp{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+  .grp:first-of-type{border-top:none;margin-top:0;padding-top:0}
+  .lbl{color:var(--dim);font-size:11px;margin-bottom:5px;display:flex;justify-content:space-between}
+  .lbl b{color:var(--txt);font-weight:600}
+  input[type=range]{width:100%;accent-color:var(--acc);margin:2px 0 8px}
+  .row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+  button{flex:1;min-width:74px;background:rgba(255,255,255,.06);color:var(--txt);
+    border:1px solid var(--line);border-radius:6px;padding:5px 6px;font-size:11.5px;cursor:pointer}
+  button:hover{background:rgba(78,163,255,.18);border-color:rgba(78,163,255,.5)}
+  button.on{background:rgba(78,163,255,.26);border-color:var(--acc)}
+  .chk{display:flex;align-items:center;gap:7px;margin:5px 0;cursor:pointer;font-size:12px}
+  .chk input{accent-color:var(--acc);cursor:pointer}
+  #ramp{height:11px;border-radius:3px;margin:6px 0 3px;
+    background:linear-gradient(90deg,#2e6b3a,#4f9d4f,#9dc23f,#e0d24a,#d99a3c,#a86a3d,#f2f2f2)}
+  .rampAx{display:flex;justify-content:space-between;color:var(--dim);font-size:10.5px}
+  .lg{display:flex;align-items:center;gap:7px;margin:4px 0;font-size:11.5px}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  #info{position:absolute;right:14px;top:14px;width:250px;background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;padding:12px 14px;z-index:10;display:none;
+    font-size:12.5px;backdrop-filter:blur(8px)}
+  #info h3{margin:0 0 8px;font-size:13.5px}
+  #info .kv{display:flex;gap:8px;margin:3px 0;color:var(--dim)}
+  #info .kv span:last-child{color:var(--txt);flex:1}
+  #info .close{position:absolute;right:10px;top:8px;cursor:pointer;color:var(--dim);font-size:15px}
+  #err{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:70%;
+    background:rgba(120,20,20,.95);border:1px solid #ff6b6b;border-radius:8px;padding:14px 18px;
+    z-index:99;display:none;font:12px/1.6 Consolas,monospace;white-space:pre-wrap}
+  #loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:var(--bg);z-index:50;color:var(--dim);font-size:13px}
+
+  /* ---------- 移动端协同适配 ---------- */
+  #cesiumContainer canvas{touch-action:none}
+  #menuBtn{display:none;position:absolute;left:12px;top:12px;z-index:20;
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    color:var(--txt);padding:9px 16px;font-size:14px;cursor:pointer;
+    backdrop-filter:blur(8px);min-height:40px;line-height:1.2}
+  #panelClose{display:none}
+  @media (max-width:768px){
+    #menuBtn{display:block}
+    #panel{left:0;top:0;bottom:0;width:min(80vw,300px);max-height:none;
+      border-radius:0;border-left:1px solid var(--line);
+      transform:translateX(-105%);transition:transform .25s ease;padding-top:18px}
+    #panel.open{transform:translateX(0)}
+    #panelClose{display:block;position:absolute;right:12px;top:10px;
+      color:var(--dim);font-size:20px;cursor:pointer;padding:4px 8px;min-height:32px}
+    #info{left:10px;right:10px;top:auto;bottom:10px;width:auto;max-height:42%;overflow-y:auto}
+    button{padding:9px 6px;font-size:13px;min-height:38px}
+    .chk{font-size:13px;margin:7px 0}
+    input[type=range]{height:26px}
+    .dot{width:11px;height:11px}
+  }
+</style>
+</head>
+<body>
+<div id="cesiumContainer"></div>
+<div id="creditSink" style="position:absolute;left:-99999px;top:-99999px;width:1px;height:1px;overflow:hidden;opacity:0"></div>
+<div id="loading">正在构建三维地形 …</div>
+<div id="err"></div>
+<button id="menuBtn">☰ 控制面板</button>
+
+<div id="panel">
+  <span id="panelClose">×</span>
+  <h1>梅州市非遗 · 三维地形</h1>
+  <div class="sub">Copernicus DEM 30 m · 名录 427 项 · 上图 424 点<br>3 项原始坐标在市域外已剔除 · 拖动旋转 / 滚轮缩放</div>
+
+  <div class="grp">
+    <div class="lbl"><span>地形垂直夸张</span><b id="vExag">2.5×</b></div>
+    <input type="range" id="exag" min="1" max="6" step="0.1" value="2.5">
+    <div class="lbl"><span>等高线间距</span><b id="vCont">200 m</b></div>
+    <input type="range" id="cont" min="50" max="500" step="25" value="200">
+  </div>
+
+  <div class="grp">
+    <div class="lbl"><span>图层</span></div>
+    <label class="chk"><input type="checkbox" id="cHill" checked>山体晕渲</label>
+    <label class="chk"><input type="checkbox" id="cCont" checked>等高线</label>
+    <label class="chk"><input type="checkbox" id="cBound" checked>区县边界</label>
+    <label class="chk"><input type="checkbox" id="cPts" checked>非遗点位（424 项）</label>
+    <label class="chk"><input type="checkbox" id="cAgg" checked>区县气泡 + 注记</label>
+  </div>
+
+  <div class="grp">
+    <div class="lbl"><span>非遗级别筛选</span></div>
+    <div class="row">
+      <button id="bAll" class="on">全部</button>
+      <button id="b1">国家级</button>
+      <button id="b2">省级</button>
+      <button id="b3">市级</button>
+      <button id="b4">县级</button>
+    </div>
+  </div>
+
+  <div class="grp">
+    <div class="lbl"><span>视角</span></div>
+    <div class="row" id="flyBtns"></div>
+  </div>
+
+  <div class="grp">
+    <div class="lbl"><span>高程色带</span></div>
+    <div id="ramp"></div>
+    <div class="rampAx"><span id="rMin">–</span><span id="rMax">–</span></div>
+    <div style="margin-top:8px">
+      <div class="lg" style="color:var(--dim)">非遗点位颜色：</div>
+      <div style="display:flex;flex-wrap:wrap;gap:2px 10px">
+        <div class="lg"><i class="dot" style="background:#ff4d6d"></i>国家级 (7)</div>
+        <div class="lg"><i class="dot" style="background:#ffa94d"></i>省级 (36)</div>
+        <div class="lg"><i class="dot" style="background:#4dd4ff"></i>市级 (111)</div>
+        <div class="lg"><i class="dot" style="background:#b197fc"></i>县级 (270)</div>
+      </div>
+      <div class="lg" style="margin-top:6px"><i class="dot" style="background:linear-gradient(90deg,#22d3ee,#ff4d6d);width:22px;height:10px;border-radius:5px"></i>区县气泡 · 大小 ∝ 项目数</div>
+      <div class="lg" style="color:var(--dim)">注记 = 区县名 + 项目数<br>点击点位/气泡查看详情</div>
+    </div>
+  </div>
+</div>
+
+<div id="info"><span class="close" id="infoClose">×</span><div id="infoBody"></div></div>
+
+<script src="cesium/Cesium.js"></script>
+<script src="dem_terrain_data.js?v=20260905b"></script>
+<script src="meizhou_layers.js?v=20260905b"></script>
+<script src="app.js?v=20260905c"></script>
+</body>
+</html>

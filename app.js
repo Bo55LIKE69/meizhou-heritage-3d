@@ -69,13 +69,13 @@
     infoBox: false, selectionIndicator: false,
     globe: false, skyBox: false, skyAtmosphere: false,
     scene3DOnly: true,
-    backgroundColor: Cesium.Color.fromCssColorString("#0a0e14"),
+    backgroundColor: Cesium.Color.fromCssColorString("#14100c"),
     creditContainer: document.getElementById("creditSink")
   });
   var scene = viewer.scene;
   // 注意：backgroundColor 不是 Viewer 的构造选项，必须在创建后显式赋给 scene，
   // 否则保持默认纯黑 (0,0,0)，页面看起来就像没渲染。
-  scene.backgroundColor = Cesium.Color.fromCssColorString("#0a0e14");
+  scene.backgroundColor = Cesium.Color.fromCssColorString("#14100c");
   try { viewer.cesiumWidget.creditDisplay.container.style.display = "none"; } catch (e) {}
   scene.renderError.addEventListener(function (s, err) {
     var msg = (err && err.message) ? err.message : String(err);
@@ -91,7 +91,7 @@
     uHillOn: 1.0, uContourOn: 1.0,
     uFlipV: 0.0,
     uFogNear: 60000.0, uFogFar: 260000.0, uFogAmt: 0.55,
-    uFogColor: new Cesium.Cartesian3(0.039, 0.055, 0.078)
+    uFogColor: new Cesium.Cartesian3(0.078, 0.063, 0.047)   // #14100c 暖矿石底色
   };
 
   // ---------------- 着色器 ----------------
@@ -131,14 +131,15 @@
     "uniform float uFogFar;",
     "uniform float uFogAmt;",
     "uniform vec3 uFogColor;",
+    // 赣州稀土项目同款矿石暖色系：谷地苔绿 → 矿脉金 → 陶土红 → 山脊米白
     "vec3 ramp(float t){",
-    "  vec3 c=vec3(0.180,0.420,0.227);",
-    "  c=mix(c,vec3(0.310,0.616,0.310),smoothstep(0.00,0.18,t));",
-    "  c=mix(c,vec3(0.616,0.761,0.247),smoothstep(0.18,0.34,t));",
-    "  c=mix(c,vec3(0.878,0.824,0.290),smoothstep(0.34,0.52,t));",
-    "  c=mix(c,vec3(0.851,0.604,0.235),smoothstep(0.52,0.70,t));",
-    "  c=mix(c,vec3(0.659,0.416,0.239),smoothstep(0.70,0.86,t));",
-    "  c=mix(c,vec3(0.949,0.949,0.949),smoothstep(0.86,1.00,t));",
+    "  vec3 c=vec3(0.290,0.388,0.286);",                     // #4a6349 谷地深绿
+    "  c=mix(c,vec3(0.510,0.659,0.416),smoothstep(0.00,0.18,t));",   // #82a86a 苔绿
+    "  c=mix(c,vec3(0.788,0.659,0.416),smoothstep(0.18,0.34,t));",   // #c9a86a 土黄
+    "  c=mix(c,vec3(0.831,0.659,0.455),smoothstep(0.34,0.52,t));",   // #d4a874 矿脉金
+    "  c=mix(c,vec3(0.753,0.380,0.227),smoothstep(0.52,0.70,t));",   // #c0613a 陶土
+    "  c=mix(c,vec3(0.612,0.290,0.184),smoothstep(0.70,0.86,t));",   // #9c4a2f 赭红
+    "  c=mix(c,vec3(0.925,0.882,0.820),smoothstep(0.86,1.00,t));",   // #ece1d1 山脊米白
     "  return c;",
     "}",
     "void main(){",
@@ -256,10 +257,10 @@
   var infoByPrim = new Map();
 
   var LEVEL_COLOR = {
-    "国家级": Cesium.Color.fromCssColorString("#ff4d6d"),
-    "省级": Cesium.Color.fromCssColorString("#ffa94d"),
-    "市级": Cesium.Color.fromCssColorString("#4dd4ff"),
-    "县级": Cesium.Color.fromCssColorString("#b197fc")
+    "国家级": Cesium.Color.fromCssColorString("#dd7a4a"),   // 陶土亮
+    "省级": Cesium.Color.fromCssColorString("#ecbe83"),     // 矿石金
+    "市级": Cesium.Color.fromCssColorString("#8cc0db"),     // 钢蓝
+    "县级": Cesium.Color.fromCssColorString("#82a86a")      // 苔绿
   };
   var LEVEL_ORDER = ["国家级", "省级", "市级", "县级"];
   var curLevel = null;   // null = 全部
@@ -305,8 +306,8 @@
     if (!document.getElementById("cAgg").checked) return;
     var counts = Object.keys(AGG).map(function (k) { return AGG[k].items.length; });
     var mx = Math.max.apply(null, counts), mn = Math.min.apply(null, counts);
-    var cLow = Cesium.Color.fromCssColorString("#22d3ee");
-    var cHigh = Cesium.Color.fromCssColorString("#ff4d6d");
+    var cLow = Cesium.Color.fromCssColorString("#6fa6c4");   // 钢蓝
+    var cHigh = Cesium.Color.fromCssColorString("#dd7a4a");  // 陶土亮
     Object.keys(AGG).forEach(function (k) {
       var g = AGG[k];
       var shown = g.items.filter(function (p) { return !curLevel || p.l === curLevel; });
@@ -329,11 +330,11 @@
         text: g.name + "  " + shown.length,
         font: "bold 15px 'Microsoft YaHei', sans-serif",
         fillColor: Cesium.Color.fromCssColorString("#ffffff"),
-        outlineColor: Cesium.Color.fromCssColorString("#0a0e14"),
+        outlineColor: Cesium.Color.fromCssColorString("#14100c"),
         outlineWidth: 4,
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         showBackground: true,
-        backgroundColor: Cesium.Color.fromCssColorString("#0a0e14").withAlpha(0.55),
+        backgroundColor: Cesium.Color.fromCssColorString("#14100c").withAlpha(0.55),
         backgroundPadding: new Cesium.Cartesian2(7, 4),
         pixelOffset: new Cesium.Cartesian2(0, -(size / 2 + 16)),
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
@@ -354,7 +355,7 @@
       var prim = ptCol.add({
         position: Cesium.Cartesian3.fromDegrees(p.lon, p.lat, h + 320),
         color: col, pixelSize: p.l === "国家级" ? 12 : 8,
-        outlineColor: Cesium.Color.fromCssColorString("#0a0e14"),
+        outlineColor: Cesium.Color.fromCssColorString("#14100c"),
         outlineWidth: 1.5,
         disableDepthTestDistance: Number.POSITIVE_INFINITY
       });
@@ -386,6 +387,24 @@
   document.getElementById("panelClose").onclick = function () { setPanel(false); };
   if (IS_MOBILE) setPanel(false);
 
+  // 项目介绍：优先用收录的专项简介（带列入年份与来源），否则退回类别释义，不做臆造
+  var INTRO = window.MZ_INTRO || {};
+  var CATDESC = window.MZ_CAT_DESC || {};
+  function introHtml(p) {
+    var it = INTRO[p.n];
+    if (it) {
+      return '<div class="year">列入 ' + it.year + "</div>" +
+             '<div class="intro">' + it.text + "</div>" +
+             '<div class="src">资料来源：' + it.src + "</div>";
+    }
+    var cd = CATDESC[p.c];
+    if (cd) {
+      return '<div class="intro">' + cd + "</div>" +
+             '<div class="src">类别释义 · 该项目专项简介待补录</div>';
+    }
+    return '<div class="intro">该项目专项介绍尚未收录，可查阅梅州市非物质文化遗产名录。</div>';
+  }
+
   var handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
   handler.setInputAction(function (click) {
     var picked = scene.pick(click.position);
@@ -402,7 +421,8 @@
         '<div class="kv"><span>级别</span><span style="color:' + lc + '">' + p.l + "</span></div>" +
         '<div class="kv"><span>类别</span><span>' + p.c + "</span></div>" +
         '<div class="kv"><span>区县</span><span>' + p.a + "</span></div>" +
-        '<div class="kv" style="color:var(--dim)"><span>说明</span><span style="font-size:11px">坐标为区县级代理位置，仅示意所属区县</span></div>';
+        introHtml(p) +
+        '<div class="kv" style="color:var(--faint)"><span>说明</span><span style="font-size:11px">坐标为区县级代理位置，仅示意所属区县</span></div>';
       infoEl.style.display = "block";
       return;
     }

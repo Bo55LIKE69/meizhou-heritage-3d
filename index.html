@@ -8,46 +8,66 @@
 <link rel="stylesheet" href="cesium/Widgets/widgets.css" />
 <style>
   :root{
-    --bg:#0a0e14; --panel:rgba(16,22,32,.92); --line:rgba(255,255,255,.10);
-    --txt:#e6edf3; --dim:#8b98a9; --acc:#4ea3ff;
+    /* 赣州稀土项目同款：暖矿石色系 */
+    --bg:#14100c; --bg2:#1b150f; --panel:rgba(31,24,19,.94); --panel2:#241d16;
+    --line:rgba(214,168,118,.14); --line2:rgba(214,168,118,.30);
+    --txt:#ece1d1; --dim:#b39e82; --faint:#806f5a;
+    --ore:#d4a874; --acc:#ecbe83; --clay:#c0613a; --clayB:#dd7a4a;
+    --steel:#6fa6c4; --steelB:#8cc0db; --moss:#82a86a;
+    --sans:"Noto Sans SC","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    --serif:"Noto Serif SC","Songti SC","SimSun",serif;
+    --mono:"JetBrains Mono","Cascadia Mono",Consolas,monospace;
+    --shadow:0 24px 60px -28px rgba(0,0,0,.7);
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
-    font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;overflow:hidden}
+    font-family:var(--sans);overflow:hidden}
   #cesiumContainer{position:absolute;inset:0}
   .cesium-widget-credits,.cesium-viewer-bottom,.cesium-credit-textContainer,
   .cesium-credit-logoContainer,.cesium-credit-lightbox,.cesium-credit-expand-link{
     display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
 
-  #panel{position:absolute;left:14px;top:14px;width:268px;max-height:calc(100% - 28px);
-    overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;
-    padding:14px 14px 16px;backdrop-filter:blur(8px);z-index:10;font-size:12.5px}
-  #panel h1{margin:0 0 2px;font-size:15px;letter-spacing:.5px}
-  #panel .sub{color:var(--dim);font-size:11px;margin-bottom:12px;line-height:1.5}
+  #panel{position:absolute;left:14px;top:14px;width:272px;max-height:calc(100% - 28px);
+    overflow-y:auto;background:var(--panel);border:1px solid var(--line2);border-radius:10px;
+    padding:14px 14px 16px;backdrop-filter:blur(8px);z-index:10;font-size:12.5px;
+    box-shadow:var(--shadow)}
+  #panel h1{margin:0 0 2px;font-size:16px;letter-spacing:.6px;font-family:var(--serif);
+    color:var(--ore)}
+  #panel .sub{color:var(--faint);font-size:11px;margin-bottom:12px;line-height:1.6;
+    border-bottom:1px solid var(--line);padding-bottom:9px}
   .grp{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
   .grp:first-of-type{border-top:none;margin-top:0;padding-top:0}
-  .lbl{color:var(--dim);font-size:11px;margin-bottom:5px;display:flex;justify-content:space-between}
-  .lbl b{color:var(--txt);font-weight:600}
-  input[type=range]{width:100%;accent-color:var(--acc);margin:2px 0 8px}
+  .lbl{color:var(--faint);font-size:11px;margin-bottom:5px;display:flex;justify-content:space-between}
+  .lbl b{color:var(--ore);font-weight:600;font-family:var(--mono);font-size:11.5px}
+  input[type=range]{width:100%;accent-color:var(--ore);margin:2px 0 8px}
   .row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
-  button{flex:1;min-width:74px;background:rgba(255,255,255,.06);color:var(--txt);
-    border:1px solid var(--line);border-radius:6px;padding:5px 6px;font-size:11.5px;cursor:pointer}
-  button:hover{background:rgba(78,163,255,.18);border-color:rgba(78,163,255,.5)}
-  button.on{background:rgba(78,163,255,.26);border-color:var(--acc)}
+  button{flex:1;min-width:74px;background:rgba(214,168,118,.06);color:var(--txt);
+    border:1px solid var(--line2);border-radius:6px;padding:5px 6px;font-size:11.5px;cursor:pointer}
+  button:hover{background:rgba(236,190,131,.16);border-color:rgba(236,190,131,.5)}
+  button.on{background:rgba(212,168,116,.24);border-color:var(--ore);color:var(--ore)}
   .chk{display:flex;align-items:center;gap:7px;margin:5px 0;cursor:pointer;font-size:12px}
-  .chk input{accent-color:var(--acc);cursor:pointer}
+  .chk input{accent-color:var(--ore);cursor:pointer}
   #ramp{height:11px;border-radius:3px;margin:6px 0 3px;
-    background:linear-gradient(90deg,#2e6b3a,#4f9d4f,#9dc23f,#e0d24a,#d99a3c,#a86a3d,#f2f2f2)}
+    background:linear-gradient(90deg,#4a6349,#82a86a,#c9a86a,#d4a874,#c0613a,#9c4a2f,#ece1d1)}
   .rampAx{display:flex;justify-content:space-between;color:var(--dim);font-size:10.5px}
   .lg{display:flex;align-items:center;gap:7px;margin:4px 0;font-size:11.5px}
   .dot{width:9px;height:9px;border-radius:50%;flex:none}
-  #info{position:absolute;right:14px;top:14px;width:250px;background:var(--panel);
-    border:1px solid var(--line);border-radius:10px;padding:12px 14px;z-index:10;display:none;
-    font-size:12.5px;backdrop-filter:blur(8px)}
-  #info h3{margin:0 0 8px;font-size:13.5px}
-  #info .kv{display:flex;gap:8px;margin:3px 0;color:var(--dim)}
+  #info{position:absolute;right:14px;top:14px;width:288px;background:var(--panel);
+    border:1px solid var(--line2);border-radius:10px;padding:12px 14px;z-index:10;display:none;
+    font-size:12.5px;backdrop-filter:blur(8px);box-shadow:var(--shadow);max-height:calc(100% - 28px);overflow-y:auto}
+  #info h3{margin:0 0 8px;font-size:14.5px;font-family:var(--serif);color:var(--ore);
+    padding-right:18px;line-height:1.4}
+  #info .kv{display:flex;gap:8px;margin:3px 0;color:var(--faint)}
   #info .kv span:last-child{color:var(--txt);flex:1}
-  #info .close{position:absolute;right:10px;top:8px;cursor:pointer;color:var(--dim);font-size:15px}
+  #info .intro{margin:9px 0 4px;padding:9px 10px;background:var(--panel2);
+    border-left:2px solid var(--ore);border-radius:0 6px 6px 0;
+    color:var(--dim);font-size:11.8px;line-height:1.75;text-align:justify}
+  #info .src{margin-top:6px;color:var(--faint);font-size:10.5px;
+    font-family:var(--mono);letter-spacing:.2px}
+  #info .year{display:inline-block;margin:6px 0 2px;padding:2px 8px;border-radius:4px;
+    background:rgba(212,168,116,.14);border:1px solid var(--line2);
+    color:var(--ore);font-size:11px;font-family:var(--mono)}
+  #info .close{position:absolute;right:10px;top:8px;cursor:pointer;color:var(--faint);font-size:16px}
   #err{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:70%;
     background:rgba(120,20,20,.95);border:1px solid #ff6b6b;border-radius:8px;padding:14px 18px;
     z-index:99;display:none;font:12px/1.6 Consolas,monospace;white-space:pre-wrap}
@@ -128,12 +148,12 @@
     <div style="margin-top:8px">
       <div class="lg" style="color:var(--dim)">非遗点位颜色：</div>
       <div style="display:flex;flex-wrap:wrap;gap:2px 10px">
-        <div class="lg"><i class="dot" style="background:#ff4d6d"></i>国家级 (7)</div>
-        <div class="lg"><i class="dot" style="background:#ffa94d"></i>省级 (36)</div>
-        <div class="lg"><i class="dot" style="background:#4dd4ff"></i>市级 (111)</div>
-        <div class="lg"><i class="dot" style="background:#b197fc"></i>县级 (270)</div>
+        <div class="lg"><i class="dot" style="background:#dd7a4a"></i>国家级 (7)</div>
+        <div class="lg"><i class="dot" style="background:#ecbe83"></i>省级 (36)</div>
+        <div class="lg"><i class="dot" style="background:#8cc0db"></i>市级 (111)</div>
+        <div class="lg"><i class="dot" style="background:#82a86a"></i>县级 (270)</div>
       </div>
-      <div class="lg" style="margin-top:6px"><i class="dot" style="background:linear-gradient(90deg,#22d3ee,#ff4d6d);width:22px;height:10px;border-radius:5px"></i>区县气泡 · 大小 ∝ 项目数</div>
+      <div class="lg" style="margin-top:6px"><i class="dot" style="background:linear-gradient(90deg,#6fa6c4,#dd7a4a);width:22px;height:10px;border-radius:5px"></i>区县气泡 · 大小 ∝ 项目数</div>
       <div class="lg" style="color:var(--dim)">注记 = 区县名 + 项目数<br>点击点位/气泡查看详情</div>
     </div>
   </div>
@@ -144,6 +164,7 @@
 <script src="cesium/Cesium.js"></script>
 <script src="dem_terrain_data.js?v=20260905b"></script>
 <script src="meizhou_layers.js?v=20260905b"></script>
-<script src="app.js?v=20260905c"></script>
+<script src="meizhou_intro.js?v=20260914a"></script>
+<script src="app.js?v=20260914a"></script>
 </body>
 </html>
